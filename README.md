@@ -19,9 +19,11 @@ Set up the database:
 
 That builds an empty `budget.db` with the `budgets` and `expenses` tables in it.
 
-One catch right now: you can't log an expense against a category that doesn't exist yet, and there's no CLI command to add one. So for now you add a category by hand:
+Categories now come with a monthly cap. To set or update one:
 
-    sqlite3 budget.db "INSERT INTO budgets (category, monthly_cap) VALUES ('groceries', 40000);"
+    python3 tracker.py budget --category groceries --cap 40000
+
+Same cents convention as everywhere else so 40000 is a $400.00 cap. Run it again with a different '--cap' for the same category and it will update the existing cap rather than create a duplicate.
 
 Money amounts are stored in cents everywhere, including `monthly_cap`. Kind of annoying to type but it avoids floating point rounding weirdness with dollars.
 
