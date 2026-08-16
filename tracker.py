@@ -54,7 +54,7 @@ def main():
 
     # --- "add" subcommand definition ---
     add_parser = subparsers.add_parser("add", help="Add a new expense")
-    add_parser.add_argument("--amount", type=int, required=True)
+    add_parser.add_argument("--amount", type=int, required=True, help="Amount in cents, e.g. 550 = $5.50")
     add_parser.add_argument("--category", required=True)
     add_parser.add_argument("--date", required=True, help="YYYY-MM-DD")
     add_parser.add_argument("--note", default=None)  # optional, defaults to nothing if not given
@@ -70,7 +70,7 @@ def main():
     if args.command == "add":
         try:
             add_expense(args.amount, args.category, args.date, args.note)
-            print(f"Added: {args.category} ${args.amount} on {args.date}")
+            print(f"Added: {args.category} ${args.amount / 100:.2f} on {args.date}")
         except ValueError as e:
             # catches the date, negative-amount, and unknown-category cases from add_expense()
             print(f"Error: {e}")
@@ -80,7 +80,7 @@ def main():
             print("No expenses recorded.")
         for id_, amount, category, date, note in rows:
             note_str = f" — {note}" if note else ""   # only show the em-dash if there's actually a note
-            print(f"[{id_}] {date}  {category:<15} ${amount}{note_str}")  # :<15 left-pads category to line columns up
+            print(f"[{id_}] {date}  {category:<15} ${amount / 100:.2f}{note_str}")  # :<15 left-pads category to line columns up
 
 
 if __name__ == "__main__":
