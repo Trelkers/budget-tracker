@@ -62,6 +62,21 @@ def set_budget(category, monthly_cap):
     conn.commit()
     conn.close()
 
+def budget_summary():
+    conn = get_connection()
+    cursor = conn.cursor()
+    # LEFT JOIN keeps categories with zero expenses
+    rows = cursor.execute(
+        """
+        SELECT b.category, b.monthly_cap, COALESCE(SUM(e.amount), 0) AS spent
+        FROM budgets b
+        LEFT JOIN expenses e ON b.category = e.category
+        GROUP BY b.category, b.monthly_cap
+        """
+    ).fetchall()
+    conn.close()
+    return rows
+
 def main():
     # --- CLI setup block ---
     # argparse turns "python tracker.py add --amount 25 ..." into actual Python values we can use
@@ -83,6 +98,9 @@ def main():
     budget_parser = subparsers.add_parser("budget", help="Set or update a category's monthly cap")
     budget_parser.add_argument("--category", required=True)
     budget_parser.add_argument("--cap", type=int, required=True, help="Monthly cap in cents")
+
+    # --- "summary" subcommand definition ---
+    subparsers.add_parser("summary", help="Show spend vs budget per category")
 
     args = parser.parse_args()   # actually reads what the user typed in the terminal
 
@@ -108,6 +126,13 @@ def main():
             print(f"Set {args.category} budget to ${args.cap / 100:.2f}")
         except ValueError as e:
             print(f"Error: {e}")
+    elif args.command == "summary":
+        rows = budget_summary()
+        if not rows:
+            print("No budgets set.")
+        for category, cap, spent in rows:
+            flag = " OVER" if spent > cap else ""
+            print(f"{category:<15} ${spent / 100:.2f} / ${cap / 100:.2f}{flag}")
 
 
 if __name__ == "__main__":
