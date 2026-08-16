@@ -45,6 +45,22 @@ def list_expenses():
     conn.close()
     return rows
 
+def set_budget(category, monthly_cap):
+    if monthly_cap <= 0:
+        raise ValueError("Monthly cap must be positive.")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    # if category exists, update its cap. otherwise, insert it as new.
+    cursor.execute(
+        """
+        INSERT INTO budgets (category, monthly_cap) VALUES (?, ?)
+        ON CONFLICT(category) DO UPDATE SET monthly_cap = excluded.monthly_cap
+        """,
+        (category, monthly_cap),
+    )
+    conn.commit()
+    conn.close()
 
 def main():
     # --- CLI setup block ---
@@ -62,6 +78,11 @@ def main():
     # --- "list" subcommand definition ---
     # no extra arguments needed, just the command itself
     subparsers.add_parser("list", help="List all expenses")
+
+    # --- "budget" subcommand definition ---
+    budget_parser = subparsers.add_parser("budget", help="Set or update a category's monthly cap")
+    budget_parser.add_argument("--category", required=True)
+    budget_parser.add_argument("--cap", type=int, required=True, help="Monthly cap in cents")
 
     args = parser.parse_args()   # actually reads what the user typed in the terminal
 
@@ -81,6 +102,12 @@ def main():
         for id_, amount, category, date, note in rows:
             note_str = f" — {note}" if note else ""   # only show the em-dash if there's actually a note
             print(f"[{id_}] {date}  {category:<15} ${amount / 100:.2f}{note_str}")  # :<15 left-pads category to line columns up
+    elif args.command == "budget":
+        try:
+            set_budget(args.category, args.cap)
+            print(f"Set {args.category} budget to ${args.cap / 100:.2f}")
+        except ValueError as e:
+            print(f"Error: {e}")
 
 
 if __name__ == "__main__":
