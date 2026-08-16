@@ -17,7 +17,7 @@ CREATE TABLE expenses (
 from db import get_connection
 
 if __name__ == "__main__":
-    conn = get_connection()
+    conn = get_connection(create_if_missing=True)
     cursor = conn.cursor()
     cursor.executescript(SCHEMA_SQL)
     conn.commit()
