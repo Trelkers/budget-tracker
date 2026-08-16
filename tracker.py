@@ -1,19 +1,25 @@
-import argparse          # lets us build a command-line interface (the "add"/"list" commands)
-from db import get_connection   # reuse the same connection logic everywhere else in the project
+import argparse
+from db import get_connection
+from datetime import datetime
 
 
 def add_expense(amount, category, date, note=None):
     # --- validation block ---
-    # reject bad data before it ever touches the database
+    # reject bad data
     if amount <= 0:
         raise ValueError("Amount must be positive.")
+
+    # catches things like "2026-13-45" or "tomorrow" before they corrupt the ORDER BY in list_expenses
+    try:
+        datetime.strptime(date, "%Y-%m-%d")
+    except ValueError:
+        raise ValueError(f"'{date}' is not a valid date. Use YYYY-MM-DD.")
 
     conn = get_connection()
     cursor = conn.cursor()
 
     # --- category check block ---
     # pull every category that currently exists in the budgets table into a set
-    # a set because we only care "is it in there", not order or duplicates
     valid_categories = {row[0] for row in cursor.execute("SELECT category FROM budgets")}
     if category not in valid_categories:
         conn.close()  # close before raising, don't leave the connection hanging open
@@ -31,7 +37,6 @@ def add_expense(amount, category, date, note=None):
 
 def list_expenses():
     # --- read block ---
-    # no validation needed here, we're only reading, not writing
     conn = get_connection()
     cursor = conn.cursor()
     rows = cursor.execute(
@@ -67,7 +72,7 @@ def main():
             add_expense(args.amount, args.category, args.date, args.note)
             print(f"Added: {args.category} ${args.amount} on {args.date}")
         except ValueError as e:
-            # catches both the negative-amount case and the unknown-category case from add_expense()
+            # catches the date, negative-amount, and unknown-category cases from add_expense()
             print(f"Error: {e}")
     elif args.command == "list":
         rows = list_expenses()
