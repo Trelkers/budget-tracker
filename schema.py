@@ -12,13 +12,13 @@ CREATE TABLE expenses (
     note TEXT,
     FOREIGN KEY (category) REFERENCES budgets(category)
 );
-
 """
 
-import sqlite3
+from db import get_connection
 
-conn = sqlite3.connect("budget.db")
-cursor = conn.cursor()
-cursor.executescript(SCHEMA_SQL)
-conn.commit()
-conn.close()
+if __name__ == "__main__":
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.executescript(SCHEMA_SQL)
+    conn.commit()
+    conn.close()
