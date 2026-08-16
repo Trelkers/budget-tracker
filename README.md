@@ -2,7 +2,7 @@
 
 A command line budget tracker written in Python, backed by SQLite. Add expenses under a category, list them back out sorted by date. Budget caps and a spend-vs-budget summary aren't wired up to the CLI yet, that part's still coming.
 
-Built this mostly to get comfortable with SQLite and actually finish something end to end instead of leaving it half done.
+Built this to get comfortable with SQLite and actually finish something end to end instead of leaving it half done.
 
 ## Setup
 
