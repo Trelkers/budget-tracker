@@ -1,10 +1,14 @@
 from schema import SCHEMA_SQL
 from db import get_connection
 
+# --- setup block ---
+# writes to sample_budget.db, not budget.db — budget.db is gitignored (local only)
+# so this is what a stranger cloning the repo actually sees populated with data
 conn = get_connection("sample_budget.db")
 cursor = conn.cursor()
 cursor.executescript(SCHEMA_SQL)
 
+# --- sample data block ---
 budgets = [
     ("groceries", 40000),
     ("transport", 15000),
@@ -21,9 +25,11 @@ expenses = [
     (2500, "entertainment", "2026-08-05", "Cinema"),
     (4500, "entertainment", "2026-08-14", "Concert ticket"),
     (250000, "rent", "2026-08-01", None),
-    (9500, "clothes", "2026-08-10", "Armani Jeans"),
+    (9500, "clothes", "2026-08-10", "Armani Jeans"),  # over the 8000 cap on purpose — shows the over-budget case in real data
 ]
 
+# --- insert block ---
+# executemany runs the same INSERT once per row in the list, instead of writing a loop ourselves
 cursor.executemany(
     "INSERT INTO budgets (category, monthly_cap) VALUES (?, ?)", budgets
 )
