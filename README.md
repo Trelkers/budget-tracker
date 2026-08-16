@@ -1,6 +1,6 @@
 # Budget Tracker
 
-A command line budget tracker written in Python, backed by SQLite. Add expenses under a category, list them back out sorted by date. Budget caps and a spend-vs-budget summary aren't wired up to the CLI yet, that part's still coming.
+A command line budget tracker written in Python, backed by SQLite. Add expenses under a category, list them back out sorted by date, set a monthly budget cap per category, and check spend against it with a summary.
 
 Built this to get comfortable with SQLite and actually finish something end to end instead of leaving it half done.
 
@@ -10,7 +10,7 @@ Needs Python 3, nothing else.
 
 Clone it and move in:
 
-    git clone <repo-url>
+    git clone https://github.com/Trelkers/budget-tracker.git
     cd budget-tracker
 
 Set up the database:
@@ -38,6 +38,12 @@ Add an expense:
 List everything:
 
     python3 tracker.py list
+
+Check spend against budget:
+
+    python3 tracker.py summary
+    
+Shows each category with a cap, what's been spent, what's left, and flags any category that's OVER.
 
 ## Notes
 
